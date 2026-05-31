@@ -54,7 +54,7 @@ if user_message:
         "content": user_message
     })
 
-        st.session_state.intimacy_score = min(
+    st.session_state.intimacy_score = min(
         100,
         st.session_state.intimacy_score + 1
     )
