@@ -78,7 +78,7 @@ if user_message:
         response = model.generate_content(prompt)
         reply = response.text
     except Exception as e:
-        reply = "เอ๊ะ ระบบฉันสะดุดนิดนึง เหมือน pixie เดินชนโต๊ะความจริง ลองพิมพ์ใหม่อีกทีได้ไหม"
+        reply = f"ERROR: {e}"
 
     st.session_state.messages.append({
         "role": "assistant",
