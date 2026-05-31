@@ -47,7 +47,7 @@ if user_message:
 
     st.session_state.intimacy_score = min(
         100,
-        st.session_state.intimacy_score + 1
+        st.session_state.intimacy_score + 10
     )
 
     st.session_state.points += 1
