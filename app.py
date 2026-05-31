@@ -77,13 +77,13 @@ if user_message:
 {user_message}
 """
 
-response = model.generate_content(prompt)
+    response = model.generate_content(prompt)
 
-reply = response.text
+    reply = response.text
 
-st.session_state.messages.append({
-    "role": "assistant",
-    "content": reply
-})
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": reply
+    })
 
-st.rerun()
+    st.rerun()
