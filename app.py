@@ -3,10 +3,12 @@ import google.generativeai as genai
 
 from behavior import get_stage, get_stage_description
 from character import CHARACTER_BIBLE
+from memory import build_chat_history
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
+USE_FAKE_AI = True
 st.set_page_config(
     page_title="i nik AI Prototype",
     page_icon="◧",
@@ -51,22 +53,28 @@ if user_message:
     )
 
     st.session_state.points += 1
-
+    chat_history = build_chat_history(st.session_state.messages, limit=10)
     prompt = f"""
 {CHARACTER_BIBLE}
 
 กฎบุคลิกตามระดับความสนิท:
 {stage_description}
 
+ประวัติการคุยล่าสุด:
+{chat_history}
+
 ผู้ใช้พูดว่า:
 {user_message}
 """
 
-    try:
+try:
+    if USE_FAKE_AI:
+        reply = f"[TEST MODE] ตอนนี้ stage คือ {stage} และ i nik จำแชตล่าสุดได้แล้ว"
+    else:
         response = model.generate_content(prompt)
         reply = response.text
-    except Exception as e:
-        reply = f"ERROR: {e}"
+except Exception as e:
+    reply = f"ERROR: {e}"
 
     st.session_state.messages.append({
         "role": "assistant",
