@@ -59,10 +59,15 @@ if user_message:
     st.session_state.points += 1
 
     st.session_state.user_facts = extract_facts(
-    user_message,
-    st.session_state.user_facts
-)
-    chat_history = build_chat_history(st.session_state.messages, limit=10)
+        user_message,
+        st.session_state.user_facts
+    )
+
+    chat_history = build_chat_history(
+        st.session_state.messages,
+        limit=10
+    )
+
     prompt = f"""
 {CHARACTER_BIBLE}
 
@@ -79,14 +84,14 @@ if user_message:
 {user_message}
 """
 
-try:
-    if USE_FAKE_AI:
-        reply = f"[TEST MODE] ตอนนี้ stage คือ {stage} และ i nik จำแชตล่าสุดได้แล้ว"
-    else:
-        response = model.generate_content(prompt)
-        reply = response.text
-except Exception as e:
-    reply = f"ERROR: {e}"
+    try:
+        if USE_FAKE_AI:
+            reply = f"[TEST MODE] ตอนนี้ stage คือ {stage} และ i nik จำแชตล่าสุดได้แล้ว"
+        else:
+            response = model.generate_content(prompt)
+            reply = response.text
+    except Exception as e:
+        reply = f"ERROR: {e}"
 
     st.session_state.messages.append({
         "role": "assistant",
