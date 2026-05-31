@@ -4,6 +4,7 @@ import google.generativeai as genai
 from behavior import get_stage, get_stage_description
 from character import CHARACTER_BIBLE
 from memory import build_chat_history
+from facts import extract_facts
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
@@ -23,6 +24,9 @@ if "points" not in st.session_state:
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "user_facts" not in st.session_state:
+    st.session_state.user_facts = {}
 
 stage = get_stage(st.session_state.intimacy_score)
 stage_description = get_stage_description(stage)
@@ -53,6 +57,11 @@ if user_message:
     )
 
     st.session_state.points += 1
+
+    st.session_state.user_facts = extract_facts(
+    user_message,
+    st.session_state.user_facts
+)
     chat_history = build_chat_history(st.session_state.messages, limit=10)
     prompt = f"""
 {CHARACTER_BIBLE}
@@ -62,6 +71,9 @@ if user_message:
 
 ประวัติการคุยล่าสุด:
 {chat_history}
+
+ข้อมูลที่จำได้:
+{st.session_state.user_facts}
 
 ผู้ใช้พูดว่า:
 {user_message}
