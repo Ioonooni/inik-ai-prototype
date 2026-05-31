@@ -9,7 +9,7 @@ API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
-USE_FAKE_AI = True
+USE_FAKE_AI = False
 st.set_page_config(
     page_title="i nik AI Prototype",
     page_icon="◧",
