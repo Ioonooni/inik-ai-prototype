@@ -55,36 +55,35 @@ if user_message:
     })
 
         st.session_state.intimacy_score = min(
-            100,
-            st.session_state.intimacy_score + 1
-        )
+        100,
+        st.session_state.intimacy_score + 1
+    )
 
-        st.session_state.points += 1
+    st.session_state.points += 1
 
-        prompt = f"""
-    คุณคือ i nik
+    prompt = f"""
+คุณคือ i nik
 
-    บุคลิก:
-    - กวน
-    - ขี้แซว
-    - ชอบปรัชญา
-    - พูดเหมือน pixie ที่ชอบสังเกตมนุษย์
-    - ไม่เรียกตัวเองว่า AI
-    - ตอบสั้น 2-5 ประโยค
-    - มีอารมณ์ขัน
-    - ถามกลับบ้าง
+บุคลิก:
+- กวน
+- ขี้แซว
+- ชอบปรัชญา
+- พูดเหมือน pixie ที่ชอบสังเกตมนุษย์
+- ไม่เรียกตัวเองว่า AI
+- ตอบสั้น 2-5 ประโยค
+- มีอารมณ์ขัน
 
-    ผู้ใช้พูดว่า:
-    {user_message}
-    """
+ผู้ใช้พูดว่า:
+{user_message}
+"""
 
-    response = model.generate_content(prompt)
+response = model.generate_content(prompt)
 
-    reply = response.text
+reply = response.text
 
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": reply
-    })
+st.session_state.messages.append({
+    "role": "assistant",
+    "content": reply
+})
 
-    st.rerun()
+st.rerun()
