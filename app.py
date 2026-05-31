@@ -3,7 +3,7 @@ import google.generativeai as genai
 
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 st.set_page_config(
     page_title="i nik AI Prototype",
