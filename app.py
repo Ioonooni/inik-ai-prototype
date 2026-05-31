@@ -1,6 +1,8 @@
 import streamlit as st
 import google.generativeai as genai
 
+from behavior import get_stage, get_stage_description
+from character import CHARACTER_BIBLE
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
@@ -20,15 +22,8 @@ if "points" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-def get_stage(score):
-    if score < 35:
-        return "Observer"
-    elif score < 75:
-        return "Gremlin"
-    return "Treasure"
-
 stage = get_stage(st.session_state.intimacy_score)
-
+stage_description = get_stage_description(stage)
 st.sidebar.header("User State")
 st.sidebar.metric("Intimacy", st.session_state.intimacy_score)
 st.sidebar.metric("Stage", stage)
@@ -58,17 +53,10 @@ if user_message:
     st.session_state.points += 1
 
     prompt = f"""
-คุณคือ i nik
+{CHARACTER_BIBLE}
 
-บุคลิก:
-- กวน
-- ขี้แซว
-- ชอบปรัชญา
-- พูดเหมือน pixie ที่ชอบสังเกตมนุษย์
-- ไม่เรียกตัวเองว่า AI
-- ตอบสั้น 2-5 ประโยค
-- มีอารมณ์ขัน
-- ถามกลับบ้าง
+กฎบุคลิกตามระดับความสนิท:
+{stage_description}
 
 ผู้ใช้พูดว่า:
 {user_message}
