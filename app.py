@@ -12,7 +12,7 @@ from relationship import (
     describe_relationship_state
 )
 from persistent_memory import load_memory, save_memory
-
+from analytics import calculate_analytics, get_engagement_label, get_system_summary
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -75,6 +75,8 @@ stage = get_stage(st.session_state.intimacy_score)
 stage_description = get_stage_description(stage)
 
 
+analytics = calculate_analytics(st.session_state)
+
 st.sidebar.header("User State")
 
 st.sidebar.metric("Intimacy", st.session_state.intimacy_score)
@@ -107,6 +109,38 @@ if st.session_state.inventory:
         st.sidebar.write(f"🎁 {item}")
 else:
     st.sidebar.write("ยังไม่มีของแปลก")
+
+st.sidebar.divider()
+
+st.sidebar.subheader("Analytics")
+
+st.sidebar.metric(
+    "Engagement",
+    analytics["engagement_score"],
+    get_engagement_label(analytics["engagement_score"])
+)
+
+st.sidebar.progress(
+    analytics["engagement_score"] / 100
+)
+
+st.sidebar.metric(
+    "Total Messages",
+    analytics["total_messages"]
+)
+
+st.sidebar.metric(
+    "Memory Facts",
+    analytics["memory_fact_count"]
+)
+
+st.sidebar.metric(
+    "Inventory Items",
+    analytics["inventory_count"]
+)
+
+with st.sidebar.expander("System Summary"):
+    st.text(get_system_summary(analytics))
 
 
 st.title("i nik ◧")
