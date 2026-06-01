@@ -141,6 +141,7 @@ st.sidebar.metric(
 
 with st.sidebar.expander("System Summary"):
     st.text(get_system_summary(analytics))
+    
 
 
 st.title("i nik ◧")
