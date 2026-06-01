@@ -7,6 +7,7 @@ from memory import build_chat_history
 from facts import extract_facts
 from rewards import check_reward
 from relationship import create_relationship_state, update_relationship_state, describe_relationship_state
+from persistent_memory import load_memory, save_memory
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
@@ -26,6 +27,9 @@ if "points" not in st.session_state:
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "persistent_memory" not in st.session_state:
+    st.session_state.persistent_memory = load_memory()
 
 if "user_facts" not in st.session_state:
     st.session_state.user_facts = {}
@@ -172,5 +176,10 @@ if user_message:
             "role": "assistant",
             "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
         })
+
+    save_memory(
+        st.session_state.user_facts,
+        st.session_state.inventory
+    )
 
     st.rerun()
