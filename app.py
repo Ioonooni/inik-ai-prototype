@@ -13,6 +13,7 @@ from relationship import (
 )
 from persistent_memory import load_memory, save_memory
 from analytics import calculate_analytics, get_engagement_label, get_system_summary
+from fake_ai import generate_fake_reply
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -141,8 +142,15 @@ st.sidebar.metric(
 
 with st.sidebar.expander("System Summary"):
     st.text(get_system_summary(analytics))
-    
 
+st.sidebar.divider()
+
+st.sidebar.subheader("Developer")
+
+use_dev_test_mode = st.sidebar.checkbox(
+    "Use Dev Test Mode",
+    value=False
+)
 
 st.title("i nik ◧")
 st.caption("AI Character Loyalty Prototype")
@@ -229,8 +237,13 @@ if user_message:
 """
 
         try:
-            if USE_FAKE_AI:
-                reply = f"[TEST MODE] ตอนนี้ stage คือ {stage} และ i nik จำข้อมูลนี้ได้: {st.session_state.user_facts}"
+            if USE_FAKE_AI or use_dev_test_mode:
+                reply = generate_fake_reply(
+                    stage,
+                    st.session_state.user_facts,
+                    st.session_state.relationship_state,
+                    analytics
+                )
             else:
                 response = model.generate_content(prompt)
                 reply = response.text
