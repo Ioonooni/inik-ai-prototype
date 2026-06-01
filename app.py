@@ -33,6 +33,9 @@ if "user_facts" not in st.session_state:
 if "relationship_state" not in st.session_state:
     st.session_state.relationship_state = create_relationship_state()
 
+if "inventory" not in st.session_state:
+    st.session_state.inventory = []
+
 stage = get_stage(st.session_state.intimacy_score)
 stage_description = get_stage_description(stage)
 st.sidebar.header("User State")
@@ -70,6 +73,17 @@ st.sidebar.metric(
     "Curiosity",
     st.session_state.relationship_state["curiosity"]
 )
+
+st.sidebar.divider()
+
+st.sidebar.subheader("Inventory")
+
+if st.session_state.inventory:
+    for item in st.session_state.inventory:
+        st.sidebar.write(f"🎁 {item}")
+else:
+    st.sidebar.write("ยังไม่มีของแปลก")
+
 st.sidebar.metric("Intimacy", st.session_state.intimacy_score)
 st.sidebar.metric("Stage", stage)
 st.sidebar.metric("Points", st.session_state.points)
@@ -153,10 +167,12 @@ if user_message:
         "content": reply
     })
 
-    if reward:
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
-        })
+if reward:
+    st.session_state.inventory.append(reward)
+
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
+    })
 
     st.rerun()
