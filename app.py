@@ -14,6 +14,7 @@ from relationship import (
 from persistent_memory import load_memory, save_memory
 from analytics import calculate_analytics, get_engagement_label, get_system_summary
 from fake_ai import generate_fake_reply
+from modes import detect_response_mode, describe_response_mode
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -53,6 +54,8 @@ if "relationship_state" not in st.session_state:
 if "inventory" not in st.session_state:
     st.session_state.inventory = st.session_state.persistent_memory.get("inventory", [])
 
+if "current_response_mode" not in st.session_state:
+    st.session_state.current_response_mode = "normal_chat"
 
 def persist_current_state():
     save_memory(
@@ -62,6 +65,7 @@ def persist_current_state():
         st.session_state.points,
         st.session_state.relationship_state
     )
+
 
     st.session_state.persistent_memory = {
         "user_facts": st.session_state.user_facts,
@@ -93,6 +97,8 @@ st.sidebar.metric("Curiosity", st.session_state.relationship_state["curiosity"])
 
 st.sidebar.divider()
 
+st.sidebar.subheader("Response Mode")
+st.sidebar.write(st.session_state.current_response_mode)
 st.sidebar.subheader("Memory")
 
 if st.session_state.user_facts:
@@ -197,6 +203,11 @@ if user_message:
         st.session_state.relationship_state
     )
 
+    response_mode = detect_response_mode(user_message)
+    st.session_state.current_response_mode = response_mode
+
+    response_mode_description = describe_response_mode(response_mode)
+
     chat_history = build_chat_history(
         st.session_state.messages,
         limit=10
@@ -219,6 +230,9 @@ if user_message:
 
 สถานะความสัมพันธ์:
 {relationship_description}
+
+โหมดการตอบปัจจุบัน:
+{response_mode_description}
 
 ประวัติการคุยล่าสุด:
 {chat_history}
