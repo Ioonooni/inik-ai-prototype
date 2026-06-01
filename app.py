@@ -27,6 +27,8 @@ from state_tools import (
     reset_chat_only,
     reset_all_memory
 )
+from fallback import build_fallback_reply
+
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -368,8 +370,15 @@ if user_message:
             else:
                 response = model.generate_content(prompt)
                 reply = response.text
-        except Exception as e:
-            reply = f"ERROR: {e}"
+                except Exception as e:
+            reply = build_fallback_reply(
+                str(e),
+                user_message,
+                stage,
+                response_mode,
+                st.session_state.user_facts,
+                st.session_state.relationship_state
+            )
 
     st.session_state.messages.append({
         "role": "assistant",
