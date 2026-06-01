@@ -28,7 +28,7 @@ from state_tools import (
     reset_all_memory
 )
 from fallback import build_fallback_reply
-
+from health import run_health_check, get_health_label
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -249,7 +249,17 @@ if st.sidebar.button("Reset Chat Only"):
 if st.sidebar.button("Reset All Memory"):
     reset_all_memory(st.session_state)
     st.rerun()
+health_result = run_health_check(st.session_state)
 
+st.sidebar.divider()
+st.sidebar.subheader("Health Check")
+
+st.sidebar.write(get_health_label(health_result))
+
+with st.sidebar.expander("Health Details"):
+    for check in health_result["checks"]:
+        icon = "✅" if check["status"] else "❌"
+        st.write(f"{icon} {check['name']}: {check['detail']}")
 
 st.title("i nik ◧")
 st.caption("AI Character Loyalty Prototype")
