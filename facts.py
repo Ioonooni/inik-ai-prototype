@@ -3,8 +3,18 @@ import re
 
 def clean_value(value):
     value = value.strip()
-    value = value.replace("นะ", "").replace("จ้า", "").replace("ค่ะ", "").replace("ครับ", "")
-    value = value.strip(" .,!?:;\"'“”‘’")
+
+    endings = [
+        "นะ", "น้า", "จ้า", "จ่ะ", "ค่ะ", "ครับ", "คับ",
+        "อะ", "อ่ะ", "เว้ย", "นะคะ", "นะครับ"
+    ]
+
+    for ending in endings:
+        if value.endswith(ending):
+            value = value[: -len(ending)]
+
+    value = value.strip()
+    value = value.strip(" .,!?:;\"'“”‘’()[]{}")
     return value.strip()
 
 
@@ -17,7 +27,9 @@ def extract_facts(user_message, facts):
         r"ชื่อฉันคือ\s*([^\n,.!?]+)",
         r"ชื่อของฉันคือ\s*([^\n,.!?]+)",
         r"เรียกฉันว่า\s*([^\n,.!?]+)",
-        r"เราเรียกว่า\s*([^\n,.!?]+)",
+        r"เรียกเราว่า\s*([^\n,.!?]+)",
+        r"ฉันคือ\s*([^\n,.!?]+)",
+        r"เราคือ\s*([^\n,.!?]+)",
     ]
 
     for pattern in name_patterns:
@@ -27,14 +39,47 @@ def extract_facts(user_message, facts):
             if name and len(name) <= 30:
                 facts["name"] = name
 
-    if "ฉันชอบ" in text:
-        liked = clean_value(text.split("ฉันชอบ", 1)[1])
-        if liked:
-            facts["likes"] = liked
+    like_patterns = [
+        r"ฉันชอบ\s*([^\n,.!?]+)",
+        r"เราชอบ\s*([^\n,.!?]+)",
+        r"ของโปรดฉันคือ\s*([^\n,.!?]+)",
+        r"ของโปรดของฉันคือ\s*([^\n,.!?]+)",
+    ]
 
-    if "เราชอบ" in text:
-        liked = clean_value(text.split("เราชอบ", 1)[1])
-        if liked:
-            facts["likes"] = liked
+    for pattern in like_patterns:
+        match = re.search(pattern, text)
+        if match:
+            liked = clean_value(match.group(1))
+            if liked and len(liked) <= 80:
+                facts["likes"] = liked
 
     return facts
+
+
+def is_name_question(user_message):
+    text = user_message.strip()
+
+    name_questions = [
+        "ฉันชื่ออะไร",
+        "เราชื่ออะไร",
+        "จำชื่อฉันได้ไหม",
+        "จำชื่อเราได้ไหม",
+        "ฉันชื่อไร",
+        "เราชื่อไร",
+        "รู้ไหมฉันชื่ออะไร",
+        "รู้ไหมเราชื่ออะไร",
+    ]
+
+    return any(question in text for question in name_questions)
+
+
+def answer_from_facts(user_message, facts):
+    if is_name_question(user_message):
+        name = facts.get("name")
+
+        if name:
+            return f"เธอชื่อ {name} ไง มนุษย์จำชื่อตัวเองไม่ไหวแล้วเหรอ หรือกำลังทดสอบ pixie ตัวเล็ก ๆ อยู่กันแน่"
+
+        return "ฉันยังไม่รู้ชื่อเธอนะ ลองบอกฉันก่อนว่า ‘ฉันชื่อ...’ แล้วฉันจะพยายามจำให้ดี แบบไม่ทำตกหลังเคาน์เตอร์"
+
+    return None

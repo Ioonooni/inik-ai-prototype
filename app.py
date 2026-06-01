@@ -4,7 +4,7 @@ import google.generativeai as genai
 from behavior import get_stage, get_stage_description
 from character import CHARACTER_BIBLE
 from memory import build_chat_history
-from facts import extract_facts
+from facts import extract_facts, answer_from_facts
 from rewards import check_reward
 from relationship import (
     create_relationship_state,
@@ -14,17 +14,18 @@ from relationship import (
 from persistent_memory import load_memory, save_memory
 
 
-API_KEY = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-USE_FAKE_AI = False
-
 st.set_page_config(
     page_title="i nik AI Prototype",
     page_icon="◧",
     layout="centered"
 )
+
+
+API_KEY = st.secrets["GEMINI_API_KEY"]
+genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel("gemini-2.5-flash")
+
+USE_FAKE_AI = False
 
 
 if "persistent_memory" not in st.session_state:
@@ -34,19 +35,40 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 if "user_facts" not in st.session_state:
-    st.session_state.user_facts = st.session_state.persistent_memory["user_facts"]
+    st.session_state.user_facts = st.session_state.persistent_memory.get("user_facts", {})
 
 if "intimacy_score" not in st.session_state:
-    st.session_state.intimacy_score = st.session_state.persistent_memory["intimacy_score"]
+    st.session_state.intimacy_score = st.session_state.persistent_memory.get("intimacy_score", 0)
 
 if "points" not in st.session_state:
-    st.session_state.points = st.session_state.persistent_memory["points"]
+    st.session_state.points = st.session_state.persistent_memory.get("points", 0)
 
 if "relationship_state" not in st.session_state:
-    st.session_state.relationship_state = st.session_state.persistent_memory["relationship_state"]
+    st.session_state.relationship_state = st.session_state.persistent_memory.get(
+        "relationship_state",
+        create_relationship_state()
+    )
 
 if "inventory" not in st.session_state:
-    st.session_state.inventory = st.session_state.persistent_memory["inventory"]
+    st.session_state.inventory = st.session_state.persistent_memory.get("inventory", [])
+
+
+def persist_current_state():
+    save_memory(
+        st.session_state.user_facts,
+        st.session_state.inventory,
+        st.session_state.intimacy_score,
+        st.session_state.points,
+        st.session_state.relationship_state
+    )
+
+    st.session_state.persistent_memory = {
+        "user_facts": st.session_state.user_facts,
+        "inventory": st.session_state.inventory,
+        "intimacy_score": st.session_state.intimacy_score,
+        "points": st.session_state.points,
+        "relationship_state": st.session_state.relationship_state
+    }
 
 
 stage = get_stage(st.session_state.intimacy_score)
@@ -65,6 +87,16 @@ st.sidebar.subheader("Relationship")
 st.sidebar.metric("Trust", st.session_state.relationship_state["trust"])
 st.sidebar.metric("Familiarity", st.session_state.relationship_state["familiarity"])
 st.sidebar.metric("Curiosity", st.session_state.relationship_state["curiosity"])
+
+st.sidebar.divider()
+
+st.sidebar.subheader("Memory")
+
+if st.session_state.user_facts:
+    for key, value in st.session_state.user_facts.items():
+        st.sidebar.write(f"{key}: {value}")
+else:
+    st.sidebar.write("ยังไม่มีข้อมูลที่จำได้")
 
 st.sidebar.divider()
 
@@ -127,7 +159,16 @@ if user_message:
         limit=10
     )
 
-    prompt = f"""
+    direct_reply = answer_from_facts(
+        user_message,
+        st.session_state.user_facts
+    )
+
+    if direct_reply:
+        reply = direct_reply
+
+    else:
+        prompt = f"""
 {CHARACTER_BIBLE}
 
 กฎบุคลิกตามระดับความสนิท:
@@ -152,14 +193,14 @@ if user_message:
 {user_message}
 """
 
-    try:
-        if USE_FAKE_AI:
-            reply = f"[TEST MODE] ตอนนี้ stage คือ {stage} และ i nik จำแชตล่าสุดได้แล้ว"
-        else:
-            response = model.generate_content(prompt)
-            reply = response.text
-    except Exception as e:
-        reply = f"ERROR: {e}"
+        try:
+            if USE_FAKE_AI:
+                reply = f"[TEST MODE] ตอนนี้ stage คือ {stage} และ i nik จำข้อมูลนี้ได้: {st.session_state.user_facts}"
+            else:
+                response = model.generate_content(prompt)
+                reply = response.text
+        except Exception as e:
+            reply = f"ERROR: {e}"
 
     st.session_state.messages.append({
         "role": "assistant",
@@ -174,12 +215,6 @@ if user_message:
             "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
         })
 
-    save_memory(
-        st.session_state.user_facts,
-        st.session_state.inventory,
-        st.session_state.intimacy_score,
-        st.session_state.points,
-        st.session_state.relationship_state
-    )
+    persist_current_state()
 
     st.rerun()
