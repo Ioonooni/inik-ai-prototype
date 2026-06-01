@@ -36,6 +36,40 @@ if "relationship_state" not in st.session_state:
 stage = get_stage(st.session_state.intimacy_score)
 stage_description = get_stage_description(stage)
 st.sidebar.header("User State")
+
+st.sidebar.metric(
+    "Intimacy",
+    st.session_state.intimacy_score
+)
+
+st.sidebar.metric(
+    "Stage",
+    stage
+)
+
+st.sidebar.metric(
+    "Points",
+    st.session_state.points
+)
+
+st.sidebar.divider()
+
+st.sidebar.subheader("Relationship")
+
+st.sidebar.metric(
+    "Trust",
+    st.session_state.relationship_state["trust"]
+)
+
+st.sidebar.metric(
+    "Familiarity",
+    st.session_state.relationship_state["familiarity"]
+)
+
+st.sidebar.metric(
+    "Curiosity",
+    st.session_state.relationship_state["curiosity"]
+)
 st.sidebar.metric("Intimacy", st.session_state.intimacy_score)
 st.sidebar.metric("Stage", stage)
 st.sidebar.metric("Points", st.session_state.points)
