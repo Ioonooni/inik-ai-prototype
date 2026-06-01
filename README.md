@@ -184,28 +184,60 @@ Project documentation
 ## System Architecture
 
 ```text
-User Input
-    ↓
-Streamlit Interface
-    ↓
-Session State
-    ↓
+User
+ ↓
+Streamlit Frontend
+ ↓
+Session State Layer
+ ├── Chat Messages
+ ├── Intimacy Score
+ ├── Points
+ ├── User Facts
+ ├── Relationship State
+ └── Inventory
+ ↓
 Behavior Engine
-    ↓
-Memory Engine
-    ↓
+ ├── Stage Detection
+ └── Stage Description
+ ↓
+Memory System
+ ├── Recent Chat Memory
+ ├── Fact Memory
+ └── Persistent JSON Memory
+ ↓
 Relationship Engine
-    ↓
-Prompt Construction
-    ↓
+ ├── Trust
+ ├── Familiarity
+ └── Curiosity
+ ↓
+Prompt Assembly
+ ├── Character Bible
+ ├── Stage Rules
+ ├── Relationship State
+ ├── Recent Chat History
+ └── User Facts
+ ↓
 Gemini API
-    ↓
+ ↓
 AI Response
-    ↓
+ ↓
 Reward System
-    ↓
-Inventory Update
-```
+ ├── Points
+ ├── Variable Reward
+ └── Inventory Update
+ Current Prototype Architecture
+
+The current version uses Streamlit session state and JSON-based persistence to keep the prototype simple, inspectable, and easy to deploy.
+
+This structure allows each system layer to be tested separately:
+
+character.py handles identity and personality rules
+behavior.py handles stage logic
+memory.py handles recent conversation memory
+facts.py handles simple user fact extraction
+relationship.py handles relationship state
+rewards.py handles variable rewards
+persistent_memory.py handles JSON-based persistence
 
 ---
 
