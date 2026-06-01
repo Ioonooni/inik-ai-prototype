@@ -15,6 +15,8 @@ from persistent_memory import load_memory, save_memory
 from analytics import calculate_analytics, get_engagement_label, get_system_summary
 from fake_ai import generate_fake_reply
 from modes import detect_response_mode, describe_response_mode
+from modes import detect_response_mode, describe_response_mode
+from profile import create_user_profile, update_user_profile, describe_user_profile
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -39,6 +41,12 @@ if "messages" not in st.session_state:
 if "user_facts" not in st.session_state:
     st.session_state.user_facts = st.session_state.persistent_memory.get("user_facts", {})
 
+if "user_profile" not in st.session_state:
+    st.session_state.user_profile = st.session_state.persistent_memory.get(
+        "user_profile",
+        create_user_profile()
+    )
+
 if "intimacy_score" not in st.session_state:
     st.session_state.intimacy_score = st.session_state.persistent_memory.get("intimacy_score", 0)
 
@@ -60,11 +68,21 @@ if "current_response_mode" not in st.session_state:
 def persist_current_state():
     save_memory(
         st.session_state.user_facts,
+        st.session_state.user_profile,
         st.session_state.inventory,
         st.session_state.intimacy_score,
         st.session_state.points,
         st.session_state.relationship_state
     )
+
+    st.session_state.persistent_memory = {
+        "user_facts": st.session_state.user_facts,
+        "user_profile": st.session_state.user_profile,
+        "inventory": st.session_state.inventory,
+        "intimacy_score": st.session_state.intimacy_score,
+        "points": st.session_state.points,
+        "relationship_state": st.session_state.relationship_state
+    }
 
 
     st.session_state.persistent_memory = {
@@ -108,6 +126,25 @@ else:
     st.sidebar.write("ยังไม่มีข้อมูลที่จำได้")
 
 st.sidebar.divider()
+
+st.sidebar.subheader("User Profile")
+
+st.sidebar.write(
+    f"Recent Mood: {st.session_state.user_profile.get('recent_mood', 'neutral')}"
+)
+
+st.sidebar.write(
+    f"Conversation Style: {st.session_state.user_profile.get('conversation_style', 'unknown')}"
+)
+
+topics = st.session_state.user_profile.get("recurring_topics", [])
+
+if topics:
+    st.sidebar.write("Recurring Topics:")
+    for topic in topics:
+        st.sidebar.write(f"- {topic}")
+else:
+    st.sidebar.write("ยังไม่มี recurring topics")
 
 st.sidebar.subheader("Inventory")
 
@@ -190,7 +227,10 @@ if user_message:
         user_message,
         st.session_state.user_facts
     )
-
+    st.session_state.user_profile = update_user_profile(
+        user_message,
+        st.session_state.user_profile
+    )
     st.session_state.relationship_state = update_relationship_state(
         user_message,
         st.session_state.relationship_state
@@ -201,6 +241,10 @@ if user_message:
 
     relationship_description = describe_relationship_state(
         st.session_state.relationship_state
+    )
+
+    user_profile_description = describe_user_profile(
+        st.session_state.user_profile
     )
 
     response_mode = detect_response_mode(user_message)
@@ -230,6 +274,9 @@ if user_message:
 
 สถานะความสัมพันธ์:
 {relationship_description}
+
+โปรไฟล์ผู้ใช้:
+{user_profile_description}
 
 โหมดการตอบปัจจุบัน:
 {response_mode_description}
