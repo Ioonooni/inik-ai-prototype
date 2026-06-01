@@ -140,11 +140,11 @@ if user_message:
 กฎบุคลิกตามระดับความสนิท:
 {stage_description}
 
-ประวัติการคุยล่าสุด:
-{chat_history}
-
 สถานะความสัมพันธ์:
 {relationship_description}
+
+ประวัติการคุยล่าสุด:
+{chat_history}
 
 ข้อมูลที่จำได้:
 {st.session_state.user_facts}
@@ -152,6 +152,8 @@ if user_message:
 ผู้ใช้พูดว่า:
 {user_message}
 """
+
+    reward = check_reward(st.session_state.points)
 
     try:
         if USE_FAKE_AI:
