@@ -111,9 +111,7 @@ if user_message:
 
     st.session_state.points += 1
 
-    reward = check_reward(
-    st.session_state.points
-    )
+    reward = check_reward(st.session_state.points)
 
     st.session_state.user_facts = extract_facts(
         user_message,
@@ -153,8 +151,6 @@ if user_message:
 {user_message}
 """
 
-    reward = check_reward(st.session_state.points)
-
     try:
         if USE_FAKE_AI:
             reply = f"[TEST MODE] ตอนนี้ stage คือ {stage} และ i nik จำแชตล่าสุดได้แล้ว"
@@ -169,12 +165,12 @@ if user_message:
         "content": reply
     })
 
-if reward:
-    st.session_state.inventory.append(reward)
+    if reward:
+        st.session_state.inventory.append(reward)
 
-    st.session_state.messages.append({
-        "role": "assistant",
-        "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
-    })
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
+        })
 
     st.rerun()
