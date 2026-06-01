@@ -6,13 +6,20 @@ from character import CHARACTER_BIBLE
 from memory import build_chat_history
 from facts import extract_facts
 from rewards import check_reward
-from relationship import create_relationship_state, update_relationship_state, describe_relationship_state
+from relationship import (
+    create_relationship_state,
+    update_relationship_state,
+    describe_relationship_state
+)
 from persistent_memory import load_memory, save_memory
+
+
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
 USE_FAKE_AI = False
+
 st.set_page_config(
     page_title="i nik AI Prototype",
     page_icon="◧",
@@ -20,11 +27,11 @@ st.set_page_config(
 )
 
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
 if "persistent_memory" not in st.session_state:
     st.session_state.persistent_memory = load_memory()
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 if "user_facts" not in st.session_state:
     st.session_state.user_facts = st.session_state.persistent_memory["user_facts"]
@@ -41,43 +48,23 @@ if "relationship_state" not in st.session_state:
 if "inventory" not in st.session_state:
     st.session_state.inventory = st.session_state.persistent_memory["inventory"]
 
+
 stage = get_stage(st.session_state.intimacy_score)
 stage_description = get_stage_description(stage)
+
+
 st.sidebar.header("User State")
 
-st.sidebar.metric(
-    "Intimacy",
-    st.session_state.intimacy_score
-)
-
-st.sidebar.metric(
-    "Stage",
-    stage
-)
-
-st.sidebar.metric(
-    "Points",
-    st.session_state.points
-)
+st.sidebar.metric("Intimacy", st.session_state.intimacy_score)
+st.sidebar.metric("Stage", stage)
+st.sidebar.metric("Points", st.session_state.points)
 
 st.sidebar.divider()
 
 st.sidebar.subheader("Relationship")
-
-st.sidebar.metric(
-    "Trust",
-    st.session_state.relationship_state["trust"]
-)
-
-st.sidebar.metric(
-    "Familiarity",
-    st.session_state.relationship_state["familiarity"]
-)
-
-st.sidebar.metric(
-    "Curiosity",
-    st.session_state.relationship_state["curiosity"]
-)
+st.sidebar.metric("Trust", st.session_state.relationship_state["trust"])
+st.sidebar.metric("Familiarity", st.session_state.relationship_state["familiarity"])
+st.sidebar.metric("Curiosity", st.session_state.relationship_state["curiosity"])
 
 st.sidebar.divider()
 
@@ -89,19 +76,19 @@ if st.session_state.inventory:
 else:
     st.sidebar.write("ยังไม่มีของแปลก")
 
-st.sidebar.metric("Intimacy", st.session_state.intimacy_score)
-st.sidebar.metric("Stage", stage)
-st.sidebar.metric("Points", st.session_state.points)
 
 st.title("i nik ◧")
 st.caption("AI Character Loyalty Prototype")
 st.write("### Talk to i nik")
 
+
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
+
 user_message = st.chat_input("พิมพ์คุยกับ i nik...")
+
 
 if user_message:
     st.session_state.messages.append({
@@ -127,6 +114,9 @@ if user_message:
         user_message,
         st.session_state.relationship_state
     )
+
+    stage = get_stage(st.session_state.intimacy_score)
+    stage_description = get_stage_description(stage)
 
     relationship_description = describe_relationship_state(
         st.session_state.relationship_state
@@ -178,7 +168,7 @@ if user_message:
             "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
         })
 
-        save_memory(
+    save_memory(
         st.session_state.user_facts,
         st.session_state.inventory,
         st.session_state.intimacy_score,
