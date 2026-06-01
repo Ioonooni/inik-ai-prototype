@@ -5,6 +5,8 @@ from behavior import get_stage, get_stage_description
 from character import CHARACTER_BIBLE
 from memory import build_chat_history
 from facts import extract_facts
+from rewards import check_reward
+from relationship import create_relationship_state, update_relationship_state, describe_relationship_state
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
@@ -27,6 +29,9 @@ if "messages" not in st.session_state:
 
 if "user_facts" not in st.session_state:
     st.session_state.user_facts = {}
+
+if "relationship_state" not in st.session_state:
+    st.session_state.relationship_state = create_relationship_state()
 
 stage = get_stage(st.session_state.intimacy_score)
 stage_description = get_stage_description(stage)
@@ -58,9 +63,22 @@ if user_message:
 
     st.session_state.points += 1
 
+    reward = check_reward(
+    st.session_state.points
+    )
+
     st.session_state.user_facts = extract_facts(
         user_message,
         st.session_state.user_facts
+    )
+
+    st.session_state.relationship_state = update_relationship_state(
+        user_message,
+        st.session_state.relationship_state
+    )
+
+    relationship_description = describe_relationship_state(
+        st.session_state.relationship_state
     )
 
     chat_history = build_chat_history(
@@ -76,6 +94,9 @@ if user_message:
 
 ประวัติการคุยล่าสุด:
 {chat_history}
+
+สถานะความสัมพันธ์:
+{relationship_description}
 
 ข้อมูลที่จำได้:
 {st.session_state.user_facts}
@@ -97,5 +118,11 @@ if user_message:
         "role": "assistant",
         "content": reply
     })
+
+    if reward:
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
+        })
 
     st.rerun()
