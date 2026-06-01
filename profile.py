@@ -1,10 +1,35 @@
+from datetime import datetime
+
+
 def create_user_profile():
     return {
         "recent_mood": "neutral",
         "conversation_style": "unknown",
         "recurring_topics": [],
-        "memorable_events": []
+        "memorable_events": [],
+        "total_messages": 0,
+        "total_visits": 0,
+        "last_interaction_date": None
     }
+
+
+def normalize_user_profile(user_profile):
+    default_profile = create_user_profile()
+
+    if not user_profile:
+        return default_profile
+
+    for key, value in default_profile.items():
+        if key not in user_profile:
+            user_profile[key] = value
+
+    return user_profile
+
+
+def register_visit(user_profile):
+    user_profile = normalize_user_profile(user_profile)
+    user_profile["total_visits"] += 1
+    return user_profile
 
 
 def detect_recent_mood(user_message):
@@ -71,12 +96,14 @@ def detect_topics(user_message):
 
 
 def update_user_profile(user_message, user_profile):
-    if not user_profile:
-        user_profile = create_user_profile()
+    user_profile = normalize_user_profile(user_profile)
 
     recent_mood = detect_recent_mood(user_message)
     conversation_style = detect_conversation_style(user_message)
     detected_topics = detect_topics(user_message)
+
+    user_profile["total_messages"] += 1
+    user_profile["last_interaction_date"] = datetime.now().isoformat(timespec="seconds")
 
     if recent_mood != "neutral":
         user_profile["recent_mood"] = recent_mood
@@ -102,13 +129,15 @@ def update_user_profile(user_message, user_profile):
 
 
 def describe_user_profile(user_profile):
-    if not user_profile:
-        user_profile = create_user_profile()
+    user_profile = normalize_user_profile(user_profile)
 
     recent_mood = user_profile.get("recent_mood", "neutral")
     conversation_style = user_profile.get("conversation_style", "unknown")
     recurring_topics = user_profile.get("recurring_topics", [])
     memorable_events = user_profile.get("memorable_events", [])
+    total_messages = user_profile.get("total_messages", 0)
+    total_visits = user_profile.get("total_visits", 0)
+    last_interaction_date = user_profile.get("last_interaction_date")
 
     return f"""
 User Profile:
@@ -116,4 +145,7 @@ User Profile:
 - Conversation Style: {conversation_style}
 - Recurring Topics: {recurring_topics}
 - Memorable Events Count: {len(memorable_events)}
+- Total User Messages: {total_messages}
+- Total Visits: {total_visits}
+- Last Interaction Date: {last_interaction_date}
 """
