@@ -235,6 +235,24 @@ Inventory Update
 * No analytics dashboard yet
 
 ---
+## Testing
+
+Core system tests are documented in:
+
+[TESTING.md](TESTING.md)
+
+The test matrix covers:
+
+- Character response
+- Fact memory
+- Name recall
+- Relationship engine
+- Curiosity signal
+- Stage progression
+- Reward system
+- Persistent memory
+
+---
 
 ## Future Roadmap
 
