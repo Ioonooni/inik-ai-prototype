@@ -239,11 +239,12 @@ if user_message:
         try:
             if USE_FAKE_AI or use_dev_test_mode:
                 reply = generate_fake_reply(
-                    stage,
-                    st.session_state.user_facts,
-                    st.session_state.relationship_state,
-                    analytics
-                )
+                user_message,
+                stage,
+                st.session_state.user_facts,
+                st.session_state.relationship_state,
+                analytics
+            )
             else:
                 response = model.generate_content(prompt)
                 reply = response.text

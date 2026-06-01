@@ -30,13 +30,20 @@ def extract_facts(user_message, facts):
         r"เรียกเราว่า\s*([^\n,.!?]+)",
         r"ฉันคือ\s*([^\n,.!?]+)",
         r"เราคือ\s*([^\n,.!?]+)",
+        r"ชื่อ\s*([^\n,.!?]+)",
     ]
 
     for pattern in name_patterns:
         match = re.search(pattern, text)
         if match:
             name = clean_value(match.group(1))
-            if name and len(name) <= 30:
+
+            blocked_words = [
+                "อะไร", "ไร", "ใคร", "ไหม", "มั้ย", "หรือเปล่า",
+                "ของฉัน", "ของเรา"
+            ]
+
+            if name and len(name) <= 30 and name not in blocked_words:
                 facts["name"] = name
 
     like_patterns = [
@@ -57,17 +64,21 @@ def extract_facts(user_message, facts):
 
 
 def is_name_question(user_message):
-    text = user_message.strip()
+    text = user_message.strip().replace("?", "").replace("มั้ย", "ไหม")
 
     name_questions = [
         "ฉันชื่ออะไร",
         "เราชื่ออะไร",
-        "จำชื่อฉันได้ไหม",
-        "จำชื่อเราได้ไหม",
         "ฉันชื่อไร",
         "เราชื่อไร",
+        "จำชื่อฉันได้ไหม",
+        "จำชื่อเราได้ไหม",
         "รู้ไหมฉันชื่ออะไร",
         "รู้ไหมเราชื่ออะไร",
+        "ชื่อฉันคืออะไร",
+        "ชื่อของฉันคืออะไร",
+        "ชื่อเราอะไร",
+        "ชื่อฉันอะไร",
     ]
 
     return any(question in text for question in name_questions)

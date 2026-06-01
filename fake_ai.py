@@ -1,4 +1,12 @@
-def generate_fake_reply(stage, user_facts, relationship_state, analytics):
+from facts import answer_from_facts
+
+
+def generate_fake_reply(user_message, stage, user_facts, relationship_state, analytics):
+    direct_reply = answer_from_facts(user_message, user_facts)
+
+    if direct_reply:
+        return f"[DEV TEST MODE]\n{direct_reply}"
+
     name = user_facts.get("name", "มนุษย์")
 
     trust = relationship_state.get("trust", 0)
