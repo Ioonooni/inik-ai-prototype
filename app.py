@@ -19,11 +19,6 @@ st.set_page_config(
     layout="centered"
 )
 
-if "intimacy_score" not in st.session_state:
-    st.session_state.intimacy_score = 0
-
-if "points" not in st.session_state:
-    st.session_state.points = 0
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -32,13 +27,19 @@ if "persistent_memory" not in st.session_state:
     st.session_state.persistent_memory = load_memory()
 
 if "user_facts" not in st.session_state:
-    st.session_state.user_facts = {}
+    st.session_state.user_facts = st.session_state.persistent_memory["user_facts"]
+
+if "intimacy_score" not in st.session_state:
+    st.session_state.intimacy_score = st.session_state.persistent_memory["intimacy_score"]
+
+if "points" not in st.session_state:
+    st.session_state.points = st.session_state.persistent_memory["points"]
 
 if "relationship_state" not in st.session_state:
-    st.session_state.relationship_state = create_relationship_state()
+    st.session_state.relationship_state = st.session_state.persistent_memory["relationship_state"]
 
 if "inventory" not in st.session_state:
-    st.session_state.inventory = []
+    st.session_state.inventory = st.session_state.persistent_memory["inventory"]
 
 stage = get_stage(st.session_state.intimacy_score)
 stage_description = get_stage_description(stage)
@@ -177,9 +178,12 @@ if user_message:
             "content": f"🎁 i nik เจอของแปลกให้เธอ: {reward}"
         })
 
-    save_memory(
+        save_memory(
         st.session_state.user_facts,
-        st.session_state.inventory
+        st.session_state.inventory,
+        st.session_state.intimacy_score,
+        st.session_state.points,
+        st.session_state.relationship_state
     )
 
     st.rerun()
