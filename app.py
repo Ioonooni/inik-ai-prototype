@@ -22,7 +22,11 @@ from profile import (
     update_user_profile,
     describe_user_profile
 )
-
+from state_tools import (
+    export_memory_json,
+    reset_chat_only,
+    reset_all_memory
+)
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -228,6 +232,21 @@ use_dev_test_mode = st.sidebar.checkbox(
     "Use Dev Test Mode",
     value=False
 )
+
+st.sidebar.download_button(
+    label="Download Memory JSON",
+    data=export_memory_json(st.session_state),
+    file_name="i_nik_memory_snapshot.json",
+    mime="application/json"
+)
+
+if st.sidebar.button("Reset Chat Only"):
+    reset_chat_only(st.session_state)
+    st.rerun()
+
+if st.sidebar.button("Reset All Memory"):
+    reset_all_memory(st.session_state)
+    st.rerun()
 
 
 st.title("i nik ◧")
