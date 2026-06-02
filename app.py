@@ -30,6 +30,7 @@ from state_tools import (
 )
 from fallback import build_fallback_reply
 from health import run_health_check, get_health_label
+from event_logger import send_event_to_n8n
 
 
 st.set_page_config(
@@ -98,6 +99,9 @@ if "inventory" not in st.session_state:
 
 if "current_response_mode" not in st.session_state:
     st.session_state.current_response_mode = "normal_chat"
+
+if "last_event_log_result" not in st.session_state:
+    st.session_state.last_event_log_result = None
 
 
 def persist_current_state():
@@ -265,6 +269,20 @@ if st.sidebar.button("Reset All Memory"):
     reset_all_memory(st.session_state)
     st.rerun()
 
+event_result = st.session_state.get("last_event_log_result")
+
+st.sidebar.divider()
+st.sidebar.subheader("Event Logging")
+
+if event_result:
+    st.sidebar.write(f"n8n OK: {event_result.get('ok')}")
+    st.sidebar.write(f"Status: {event_result.get('status_code')}")
+
+    if event_result.get("error"):
+        st.sidebar.error(event_result.get("error"))
+else:
+    st.sidebar.write("ยังไม่มี event log")
+
 health_result = run_health_check(st.session_state)
 
 st.sidebar.divider()
@@ -421,5 +439,17 @@ if user_message:
         })
 
     persist_current_state()
+
+    event_result = send_event_to_n8n(
+        "user_message",
+        st.session_state,
+        extra={
+            "message": user_message,
+            "reply": reply,
+            "reward": reward
+        }
+    )
+
+    st.session_state.last_event_log_result = event_result
 
     st.rerun()
