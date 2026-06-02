@@ -31,7 +31,11 @@ from state_tools import (
 from fallback import build_fallback_reply
 from health import run_health_check, get_health_label
 from event_logger import send_event_to_n8n
-
+from redemption import (
+    redeem_first_inventory_item,
+    get_redemption_count,
+    get_latest_redemption
+)
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -102,7 +106,8 @@ if "current_response_mode" not in st.session_state:
 
 if "last_event_log_result" not in st.session_state:
     st.session_state.last_event_log_result = None
-
+if "last_redemption_result" not in st.session_state:
+    st.session_state.last_redemption_result = None
 
 def persist_current_state():
     save_memory(
@@ -190,15 +195,41 @@ if topics:
 else:
     st.sidebar.write("ยังไม่มี recurring topics")
 
-st.sidebar.divider()
-
 st.sidebar.subheader("Inventory")
 
 if st.session_state.inventory:
     for item in st.session_state.inventory:
         st.sidebar.write(f"🎁 {item}")
+
+    if st.sidebar.button("Redeem First Item"):
+        redemption_result = redeem_first_inventory_item(st.session_state)
+        st.session_state.last_redemption_result = redemption_result
+
+        if redemption_result["ok"]:
+            persist_current_state()
+
+            event_result = send_event_to_n8n(
+                "reward_redeemed",
+                st.session_state,
+                extra={
+                    "redemption": redemption_result["record"]
+                }
+            )
+
+            st.session_state.last_event_log_result = event_result
+
+        st.rerun()
+
 else:
     st.sidebar.write("ยังไม่มีของแปลก")
+
+redemption_count = get_redemption_count(st.session_state.user_profile)
+latest_redemption = get_latest_redemption(st.session_state.user_profile)
+
+st.sidebar.write(f"Redeemed Items: {redemption_count}")
+
+if latest_redemption:
+    st.sidebar.write(f"Latest Redeemed: {latest_redemption.get('item')}")
 
 st.sidebar.divider()
 
@@ -282,7 +313,23 @@ if event_result:
         st.sidebar.error(event_result.get("error"))
 else:
     st.sidebar.write("ยังไม่มี event log")
+redemption_result = st.session_state.get("last_redemption_result")
 
+st.sidebar.divider()
+st.sidebar.subheader("Redemption Status")
+
+if redemption_result:
+    st.sidebar.write(f"Redeem OK: {redemption_result.get('ok')}")
+
+    if redemption_result.get("error"):
+        st.sidebar.error(redemption_result.get("error"))
+
+    if redemption_result.get("record"):
+        st.sidebar.write(
+            f"Item: {redemption_result['record'].get('item')}"
+        )
+else:
+    st.sidebar.write("ยังไม่มี redemption")
 health_result = run_health_check(st.session_state)
 
 st.sidebar.divider()
