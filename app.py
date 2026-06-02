@@ -11,7 +11,7 @@ from relationship import (
     update_relationship_state,
     describe_relationship_state
 )
-from persistent_memory import load_memory, save_memory
+from memory_gateway import load_memory, save_memory
 from analytics import calculate_analytics, get_engagement_label, get_system_summary
 from fake_ai import generate_fake_reply
 from modes import detect_response_mode, describe_response_mode

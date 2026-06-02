@@ -2,7 +2,7 @@ import json
 
 from relationship import create_relationship_state
 from profile import create_user_profile
-from persistent_memory import save_memory
+from memory_gateway import save_memory
 
 
 def build_memory_snapshot(session_state):
