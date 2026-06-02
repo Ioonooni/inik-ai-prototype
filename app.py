@@ -12,6 +12,7 @@ from relationship import (
     describe_relationship_state
 )
 from memory_gateway import load_memory, save_memory, get_memory_status
+from supabase_memory import get_redacted_supabase_url
 from analytics import calculate_analytics, get_engagement_label, get_system_summary
 from fake_ai import generate_fake_reply
 from modes import detect_response_mode, describe_response_mode
@@ -29,6 +30,7 @@ from state_tools import (
 )
 from fallback import build_fallback_reply
 from health import run_health_check, get_health_label
+
 
 st.set_page_config(
     page_title="i nik AI Prototype",
@@ -243,6 +245,7 @@ st.sidebar.subheader("Database Status")
 st.sidebar.write(f"Source: {memory_status.get('source')}")
 st.sidebar.write(f"Supabase Load: {memory_status.get('supabase_load')}")
 st.sidebar.write(f"Supabase Save: {memory_status.get('supabase_save')}")
+st.sidebar.write(f"URL: {get_redacted_supabase_url()}")
 
 if memory_status.get("last_error"):
     st.sidebar.error(memory_status.get("last_error"))
@@ -261,6 +264,7 @@ if st.sidebar.button("Reset Chat Only"):
 if st.sidebar.button("Reset All Memory"):
     reset_all_memory(st.session_state)
     st.rerun()
+
 health_result = run_health_check(st.session_state)
 
 st.sidebar.divider()
@@ -272,6 +276,7 @@ with st.sidebar.expander("Health Details"):
     for check in health_result["checks"]:
         icon = "✅" if check["status"] else "❌"
         st.write(f"{icon} {check['name']}: {check['detail']}")
+
 
 st.title("i nik ◧")
 st.caption("AI Character Loyalty Prototype")
