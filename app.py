@@ -11,7 +11,7 @@ from relationship import (
     update_relationship_state,
     describe_relationship_state
 )
-from memory_gateway import load_memory, save_memory
+from memory_gateway import load_memory, save_memory, get_memory_status
 from analytics import calculate_analytics, get_engagement_label, get_system_summary
 from fake_ai import generate_fake_reply
 from modes import detect_response_mode, describe_response_mode
@@ -234,6 +234,18 @@ use_dev_test_mode = st.sidebar.checkbox(
     "Use Dev Test Mode",
     value=False
 )
+
+memory_status = get_memory_status()
+
+st.sidebar.divider()
+st.sidebar.subheader("Database Status")
+
+st.sidebar.write(f"Source: {memory_status.get('source')}")
+st.sidebar.write(f"Supabase Load: {memory_status.get('supabase_load')}")
+st.sidebar.write(f"Supabase Save: {memory_status.get('supabase_save')}")
+
+if memory_status.get("last_error"):
+    st.sidebar.error(memory_status.get("last_error"))
 
 st.sidebar.download_button(
     label="Download Memory JSON",
