@@ -10,7 +10,7 @@ This project demonstrates how an AI character can combine personality consistenc
 
 ## Live Demo
 
-[Talk to i nik][https://inik-ai-prototype-kqelfbrxvnbk3xtygziygn.streamlit.app/]
+[Talk to i nik](https://inik-ai-prototype-kqelfbrxvnbk3xtygziygn.streamlit.app/)
 
 ---
 
